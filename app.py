@@ -1,42 +1,107 @@
 import streamlit as st
-from utils import login, register
+import dashboard
+import searchpapers
+import uploadpdf
+import Atools
+import home
+import workspace
+import docspace
+st.set_page_config(layout="wide")
 
-st.set_page_config(page_title="ResearchHub AI", layout="wide")
+# ------------------ SESSION ------------------
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
 
-if "token" not in st.session_state:
-    st.session_state.token = None
+# ------------------ CUSTOM CSS ------------------
+st.markdown("""
+<style>
 
-st.title("🧠 ResearchHub AI")
-st.subheader("Agentic AI Powered Research Platform")
+/* Hide default radio circle */
+div[role="radiogroup"] > label > div:first-child {
+    display: none;
+}
 
-if st.session_state.token is None:
-    tab1, tab2 = st.tabs(["Login", "Register"])
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    padding-top: 20px;
+    border-right: 1px solid #eee;
+}
 
-    with tab1:
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
+/* Sidebar Title */
+.sidebar-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
 
-        if st.button("Login"):
-            res = login(email, password)
-            if res.status_code == 200:
-                st.session_state.token = res.json()["access_token"]
-                st.success("Login successful!")
-                st.rerun()
-            else:
-                st.error("Invalid credentials")
+.sidebar-subtitle {
+    font-size: 14px;
+    color: gray;
+    margin-bottom: 15px;
+}
 
-    with tab2:
-        email_r = st.text_input("Email ", key="reg_email")
-        password_r = st.text_input("Password ", type="password", key="reg_pass")
+/* Menu items */
+div[role="radiogroup"] label {
+    padding: 12px 15px !important;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #444;
+}
 
-        if st.button("Register"):
-            res = register(email_r, password_r)
-            if res.status_code == 200:
-                st.success("Registration successful. Please login.")
-            else:
-                st.error("Registration failed.")
+/* Hover effect */
+div[role="radiogroup"] label:hover {
+    background-color: #f3f0ff;
+    color: #6a11cb;
+}
 
-else:
-    st.sidebar.success("Logged in")
-    st.sidebar.button("Logout", on_click=lambda: st.session_state.clear())
-    st.write("Use the sidebar to navigate between features.")
+/* Selected item */
+div[role="radiogroup"] input:checked + div {
+    background-color: #ede9fe;
+    color: #6a11cb;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ------------------ SIDEBAR ------------------
+st.sidebar.markdown('<div class="sidebar-title">🔬 ResearchHub AI</div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-subtitle">Navigation</div>', unsafe_allow_html=True)
+
+menu = [
+    "🏠 Home",
+    "📊 Dashboard",
+    "🔎 Search Papers",
+    " workspace",
+    "🤖 AI Tools",
+    "📤 Upload PDF",
+    "📁 DocSpace"
+]
+
+choice = st.sidebar.radio("", menu, label_visibility="collapsed")
+
+st.session_state.page = choice
+
+# ------------------ ROUTING ------------------
+if choice == "🏠 Home":
+    home.show()
+
+elif choice == "📊 Dashboard":
+    dashboard.show()
+
+elif choice == "🔎 Search Papers":
+    searchpapers.show()
+elif choice==" workspace":
+    workspace.show()
+
+elif choice == "🤖 AI Tools":
+    Atools.show()
+
+elif choice == "📤 Upload PDF":
+    uploadpdf.show()
+
+elif choice == "📁 DocSpace":
+    docspace.show()
