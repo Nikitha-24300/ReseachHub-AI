@@ -70,5 +70,3 @@ React Documentation
 
 Tailwind CSS
 
-
-
