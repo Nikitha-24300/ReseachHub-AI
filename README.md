@@ -1,4 +1,4 @@
-ResearchHub AI
+#ResearchHub AI
 
 Intelligent Research Paper Management and Analysis System using Agentic AI
 
