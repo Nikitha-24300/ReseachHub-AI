@@ -1,12 +1,5 @@
 # ResearchHub AI
 
-![GitHub repo size](https://img.shields.io/github/repo-size/username/ResearchHub-AI)
-![GitHub contributors](https://img.shields.io/github/contributors/username/ResearchHub-AI)
-![GitHub stars](https://img.shields.io/github/stars/username/ResearchHub-AI)
-![GitHub issues](https://img.shields.io/github/issues/username/ResearchHub-AI)
-![GitHub license](https://img.shields.io/github/license/username/ResearchHub-AI)
-
----
 
 ## Overview
 
