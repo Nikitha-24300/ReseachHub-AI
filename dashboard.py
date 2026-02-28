@@ -1,179 +1,108 @@
 import streamlit as st
+from datetime import datetime
 
 def show():
 
-    st.set_page_config(layout="wide")
+    # ------------------ INIT SESSION ------------------
+    if "workspaces" not in st.session_state:
+        st.session_state.workspaces = []
 
-    # ------------------ CUSTOM CSS ------------------
-    st.markdown("""
-    <style>
+    if "papers_imported" not in st.session_state:
+        st.session_state.papers_imported = 0
 
-    body {
-        background-color: #f6f7fb;
-    }
-
-    .block-container {
-        padding-top: 2rem;
-        padding-left: 3rem;
-        padding-right: 3rem;
-    }
-
-    /* Header */
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .title {
-        font-size: 28px;
-        font-weight: 700;
-    }
-
-    .subtitle {
-        color: #666;
-        font-size: 14px;
-    }
-
-    .avatar {
-        background-color: #8e2de2;
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: 600;
-    }
-
-    /* Summary Cards */
-    .card {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-    }
-
-    .card-title {
-        font-size: 14px;
-        color: #777;
-    }
-
-    .card-value {
-        font-size: 24px;
-        font-weight: 700;
-        margin-top: 5px;
-    }
-
-    /* Create Button */
-    .create-btn {
-        background: linear-gradient(90deg, #6a11cb, #8e2de2);
-        color: white;
-        padding: 10px 22px;
-        border-radius: 8px;
-        display: inline-block;
-        margin-top: 20px;
-        font-weight: 600;
-    }
-
-    /* Workspace Cards */
-    .workspace-card {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-    }
-
-    .workspace-title {
-        font-weight: 600;
-        font-size: 16px;
-    }
-
-    .workspace-meta {
-        font-size: 13px;
-        color: #777;
-        margin-top: 5px;
-    }
-
-    .badge {
-        background-color: #ede9fe;
-        color: #6a11cb;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
+    if "selected_workspace" not in st.session_state:
+        st.session_state.selected_workspace = None
 
     # ------------------ HEADER ------------------
-    col1, col2 = st.columns([8, 1])
+    st.title("📊 Dashboard")
+    st.caption("Manage your research workspaces")
 
-    with col1:
-        st.markdown('<div class="title">Dashboard</div>', unsafe_allow_html=True)
-        st.markdown('<div class="subtitle">Manage your research workspaces</div>', unsafe_allow_html=True)
+    total_workspaces = len(st.session_state.workspaces)
 
-    with col2:
-        st.markdown('<div class="avatar">R</div>', unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # ------------------ SUMMARY CARDS ------------------
     col1, col2, col3 = st.columns(3)
 
-    with col1:
-        st.markdown("""
-        <div class="card">
-            <div class="card-title">Total Workspaces</div>
-            <div class="card-value">6</div>
-        </div>
-        """, unsafe_allow_html=True)
+    col1.metric("Total Workspaces", total_workspaces)
+    col2.metric("Papers Imported", st.session_state.papers_imported)
 
-    with col2:
-        st.markdown("""
-        <div class="card">
-            <div class="card-title">Papers Imported</div>
-            <div class="card-value">0</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # 🔥 QUICK ACTION
+    if col3.button("🔎 Go To Search Papers"):
+        st.session_state.page = "🔎 Search Papers"
+        st.rerun()
 
-    with col3:
-        st.markdown("""
-        <div class="card">
-            <div class="card-title">Quick Actions</div>
-            <div style="color:#6a11cb; margin-top:8px;">🔎 Search Papers</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.divider()
 
-    # ------------------ CREATE BUTTON ------------------
-    st.markdown('<div class="create-btn">+ Create New Workspace</div>', unsafe_allow_html=True)
+    # ------------------ CREATE WORKSPACE ------------------
+    with st.expander("➕ Create New Workspace"):
 
-    st.markdown("<br>", unsafe_allow_html=True)
+        ws_name = st.text_input("Workspace Name")
+        ws_desc = st.text_area("Description")
 
-    # ------------------ WORKSPACE GRID ------------------
-    workspaces = [
-        ("AI", "No description", "10/24/2025"),
-        ("ML", "No description", "10/25/2025"),
-        ("MR", "research analysis", "10/29/2025"),
-        ("PRAMOD", "", "10/29/2025"),
-        ("Project 1", "", "10/29/2025"),
-        ("Agentic ai", "", "10/29/2025"),
-    ]
+        if st.button("Create Workspace"):
+            if ws_name:
+                st.session_state.workspaces.append({
+                    "name": ws_name,
+                    "description": ws_desc,
+                    "date": datetime.now().strftime("%d/%m/%Y"),
+                    "papers": []
+                })
+                st.success("Workspace Created!")
+                st.rerun()
+            else:
+                st.warning("Workspace name required")
 
-    cols = st.columns(3)
+    st.divider()
 
-    for i, ws in enumerate(workspaces):
-        with cols[i % 3]:
-            st.markdown(f"""
-            <div class="workspace-card">
-                <div style="display:flex; justify-content:space-between;">
-                    <div class="workspace-title">{ws[0]}</div>
-                    <div class="badge">0 papers</div>
-                </div>
-                <div class="workspace-meta">{ws[1]}</div>
-                <div class="workspace-meta">📅 Created {ws[2]}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    # ------------------ IMPORT PAPER ------------------
+    if total_workspaces > 0:
+
+        st.subheader("📥 Import Paper to Workspace")
+
+        workspace_names = [ws["name"] for ws in st.session_state.workspaces]
+
+        selected_ws = st.selectbox("Select Workspace", workspace_names)
+
+        paper_title = st.text_input("Paper Title")
+        paper_link = st.text_input("Paper Link")
+
+        if st.button("Import Paper"):
+
+            if paper_title and paper_link:
+
+                for ws in st.session_state.workspaces:
+                    if ws["name"] == selected_ws:
+                        ws["papers"].append({
+                            "title": paper_title,
+                            "link": paper_link
+                        })
+
+                st.session_state.papers_imported += 1
+
+                st.success("Paper Imported Successfully!")
+                st.rerun()
+
+            else:
+                st.warning("Enter paper title and link")
+
+    st.divider()
+
+    # ------------------ WORKSPACE LIST ------------------
+    if total_workspaces == 0:
+        st.info("No workspaces yet.")
+        return
+
+    st.subheader("📁 Your Workspaces")
+
+    for ws in st.session_state.workspaces:
+
+        with st.container():
+            st.markdown(f"### {ws['name']}")
+            st.caption(f"📅 Created {ws['date']}")
+            st.write(ws["description"])
+
+            st.write(f"📄 Papers: {len(ws['papers'])}")
+
+            # Show papers
+            for paper in ws["papers"]:
+                st.markdown(f"- [{paper['title']}]({paper['link']})")
+
+            st.divider()
