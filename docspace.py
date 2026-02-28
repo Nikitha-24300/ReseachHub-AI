@@ -4,8 +4,6 @@ from datetime import datetime
 
 def show():
 
-    st.set_page_config(layout="wide")
-
     # ---------------- CSS ----------------
     st.markdown("""
     <style>
@@ -17,21 +15,6 @@ def show():
 
     body {
         background-color: #f5f7fb;
-    }
-
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .doc-list {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        height: 500px;
     }
 
     .editor-card {
@@ -46,7 +29,6 @@ def show():
         font-weight: 500;
         padding: 8px 15px;
     }
-
     </style>
     """, unsafe_allow_html=True)
 
@@ -59,6 +41,9 @@ def show():
 
     if "current_doc" not in st.session_state:
         st.session_state.current_doc = "agentic ai"
+
+    if "rename_mode" not in st.session_state:
+        st.session_state.rename_mode = False
 
     # ---------------- Layout ----------------
     col1, col2 = st.columns([1, 3])
@@ -80,6 +65,7 @@ def show():
         for doc in st.session_state.documents:
             if st.button(doc, use_container_width=True):
                 st.session_state.current_doc = doc
+                st.session_state.rename_mode = False
                 st.rerun()
 
     # -------- RIGHT PANEL --------
@@ -87,17 +73,40 @@ def show():
 
         current_doc = st.session_state.current_doc
 
-        # Top bar
-        colA, colB, colC = st.columns([6,1,1])
+        colA, colB, colC, colD = st.columns([5,1,1,1])
 
+        # Document Title / Rename
         with colA:
-            st.subheader(current_doc)
+            if st.session_state.rename_mode:
+                new_name = st.text_input("Rename Document", value=current_doc)
 
+                if st.button("✅ Confirm Rename"):
+                    if new_name and new_name not in st.session_state.documents:
+                        st.session_state.documents[new_name] = \
+                            st.session_state.documents.pop(current_doc)
+                        st.session_state.current_doc = new_name
+                        st.session_state.rename_mode = False
+                        st.success("Renamed Successfully!")
+                        st.rerun()
+                    else:
+                        st.error("Invalid or duplicate name")
+
+            else:
+                st.subheader(current_doc)
+
+        # Rename Button
         with colB:
+            if st.button("✏ Rename"):
+                st.session_state.rename_mode = True
+                st.rerun()
+
+        # Save Button
+        with colC:
             if st.button("💾 Save"):
                 st.success("Document Saved!")
 
-        with colC:
+        # Download Button
+        with colD:
             st.download_button(
                 "⬇ Download",
                 st.session_state.documents[current_doc]["content"],
