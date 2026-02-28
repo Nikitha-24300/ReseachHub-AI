@@ -1,4 +1,8 @@
 import streamlit as st
+
+# -------- IMPORT ALL PAGE FILES --------
+import register
+import login
 import dashboard
 import searchpapers
 import uploadpdf
@@ -6,102 +10,104 @@ import Atools
 import home
 import workspace
 import docspace
-st.set_page_config(layout="wide")
 
-# ------------------ SESSION ------------------
+
+# -------- PAGE CONFIG --------
+st.set_page_config(
+    page_title="ResearchHub AI",
+    layout="wide"
+)
+
+# -------- SESSION STATE INIT --------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = None
+
+if "token" not in st.session_state:
+    st.session_state.token = None
+
 if "page" not in st.session_state:
-    st.session_state.page = "Home"
+    if st.session_state.logged_in:
+        st.session_state.page = "🏠 Home"
+    else:
+        st.session_state.page = "Register"
 
-# ------------------ CUSTOM CSS ------------------
-st.markdown("""
-<style>
 
-/* Hide default radio circle */
-div[role="radiogroup"] > label > div:first-child {
-    display: none;
-}
+# -------- SIDEBAR HEADER --------
+st.sidebar.markdown("## 🔬 ResearchHub AI")
 
-/* Sidebar background */
-section[data-testid="stSidebar"] {
-    background-color: #ffffff;
-    padding-top: 20px;
-    border-right: 1px solid #eee;
-}
+if st.session_state.logged_in:
+    st.sidebar.caption(f"Logged in as: {st.session_state.username}")
+else:
+    st.sidebar.caption("Navigation")
 
-/* Sidebar Title */
-.sidebar-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
 
-.sidebar-subtitle {
-    font-size: 14px;
-    color: gray;
-    margin-bottom: 15px;
-}
+# -------- SIDEBAR MENU --------
+if not st.session_state.logged_in:
+    menu = ["Register", "Login"]
+else:
+    menu = [
+        "🏠 Home",
+        "📊 Dashboard",
+        "🔎 Search Papers",
+        "🧠 Workspace",
+        "🤖 AI Tools",
+        "📤 Upload PDF",
+        "📁 DocSpace",
+        "Logout"
+    ]
 
-/* Menu items */
-div[role="radiogroup"] label {
-    padding: 12px 15px !important;
-    border-radius: 8px;
-    margin-bottom: 6px;
-    font-weight: 500;
-    color: #444;
-}
+# Keep radio synced with session page
+selected = st.sidebar.radio(
+    "",
+    menu,
+    index=menu.index(st.session_state.page)
+    if st.session_state.page in menu else 0
+)
 
-/* Hover effect */
-div[role="radiogroup"] label:hover {
-    background-color: #f3f0ff;
-    color: #6a11cb;
-}
+# Update session page
+st.session_state.page = selected
 
-/* Selected item */
-div[role="radiogroup"] input:checked + div {
-    background-color: #ede9fe;
-    color: #6a11cb;
-    font-weight: 600;
-    border-radius: 8px;
-}
 
-</style>
-""", unsafe_allow_html=True)
+# -------- ROUTING SYSTEM --------
 
-# ------------------ SIDEBAR ------------------
-st.sidebar.markdown('<div class="sidebar-title">🔬 ResearchHub AI</div>', unsafe_allow_html=True)
-st.sidebar.markdown('<div class="sidebar-subtitle">Navigation</div>', unsafe_allow_html=True)
+# ----- NOT LOGGED IN -----
+if not st.session_state.logged_in:
 
-menu = [
-    "🏠 Home",
-    "📊 Dashboard",
-    "🔎 Search Papers",
-    " workspace",
-    "🤖 AI Tools",
-    "📤 Upload PDF",
-    "📁 DocSpace"
-]
+    if selected == "Register":
+        register.show()
 
-choice = st.sidebar.radio("", menu, label_visibility="collapsed")
+    elif selected == "Login":
+        login.show()
 
-st.session_state.page = choice
 
-# ------------------ ROUTING ------------------
-if choice == "🏠 Home":
-    home.show()
+# ----- LOGGED IN -----
+else:
 
-elif choice == "📊 Dashboard":
-    dashboard.show()
+    if selected == "🏠 Home":
+        home.show()
 
-elif choice == "🔎 Search Papers":
-    searchpapers.show()
-elif choice==" workspace":
-    workspace.show()
+    elif selected == "📊 Dashboard":
+        dashboard.show()
 
-elif choice == "🤖 AI Tools":
-    Atools.show()
+    elif selected == "🔎 Search Papers":
+        searchpapers.show()
 
-elif choice == "📤 Upload PDF":
-    uploadpdf.show()
+    elif selected == "🧠 Workspace":
+        workspace.show()
 
-elif choice == "📁 DocSpace":
-    docspace.show()
+    elif selected == "🤖 AI Tools":
+        Atools.show()
+
+    elif selected == "📤 Upload PDF":
+        uploadpdf.show()
+
+    elif selected == "📁 DocSpace":
+        docspace.show()
+
+    elif selected == "Logout":
+        st.session_state.clear()
+        st.success("Logged out successfully!")
+        st.rerun()
